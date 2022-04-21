@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset = "UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>The AI Guard</title>
+        <link type = "text/css" rel = "stylesheet" href = "./css/style.css">
+    </head>
+
+    <body>
+        <div class = "container">
+                <div id = "system-message" >This is a demo</div>
+
+        </div>
+
+        <div class="container-2">
+            <video autoplay muted id="webcam"></video>
+            <div id  ="face-line"><img src = "./assets/img/face-line.svg" alt ="face-line"></div>
+            <div id = "setting-btn"><input type="image" src = "./assets/img/setting.svg" alt = "setting logo"></div>
+            <div id = "help-btn"><input type="image" src = "./assets/img/help.svg" alt = "help logo"></div>
+        </div>
+
+        <div class = "container-3">
+            <button onclick="videoStop()">Stop Video</button>
+            <button id = "webcamButton">Enable Webcam</button>
+        </div>
+
+
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js'></script>
+        <script type = "text/javascript" src = "./script.js"></script>
+        <!-- Import TensorFlow.js library -->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js" type="text/javascript"></script>
+    </body>
+</html>
