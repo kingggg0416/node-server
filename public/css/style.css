@@ -1,3 +1,5 @@
+@import "animate.min.css";
+
 :root {
     --bs-blue: #0d6efd;
     --bs-indigo: #6610f2;
@@ -50,15 +52,27 @@
     --bs-body-line-height: 1.5;
     --bs-body-color: #212529;
     --bs-body-bg: #fff;
-  }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
+}
 
 body {
-    display: flex;
-    width: 100%;
-    height: 100%;
+    background-image: url('../assets/img/restaurant-background.png');
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover; 
+}
+
+#temp-helper {
+    position: absolute;
+    z-index: 2;
 }
 
 .color-overlay {
@@ -72,6 +86,40 @@ body {
     opacity: 40%;
 }
 
+#dynamic-element {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#faceline-container {
+    position: absolute;
+    bottom: 20%;
+}
+
+#webcam-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+#webcam {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: rotateY(180deg);
+    z-index: -1;
+}
+
+#faceline-image{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    overflow: hidden;
+}
 
 .message-1 {
     font-family: Futura;
@@ -120,4 +168,21 @@ body {
 
 #button-style-two {
     right: 4%;
+}
+
+
+/* dynamic element class*/
+
+#blue-shadow{
+    position: absolute;
+    width: 100%;
+    height: 25%;
+    top:0;
+    background-image: linear-gradient(to bottom, #2f74b5 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+#qrcode {
+    position: absolute;
+    bottom: 3%;
+    left: 5%;
 }

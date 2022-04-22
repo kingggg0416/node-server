@@ -3,7 +3,7 @@ const { append } = require("express/lib/response")
 
 const router = express.Router()
 
-append.get("/", (req, res) => {
+app.get("/", (req, res) => {
     res.send("Hello")
 })
 

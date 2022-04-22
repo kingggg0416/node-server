@@ -4,13 +4,14 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "devStart" : "nodemon app.js"
+    "devStart": "nodemon app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "animate.css": "^4.1.1",
     "express": "^4.17.3",
     "socket.io": "^4.4.1",
     "socket.io-client": "^4.4.1"
