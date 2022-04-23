@@ -42,4 +42,3 @@ io.on('connection', function(socket) {
         socket.emit("temp-reading", Math.round(((Math.random()*100)*7)/10));
     }, 1000);
 })
-

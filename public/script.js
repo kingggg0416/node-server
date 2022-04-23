@@ -45,6 +45,7 @@ function enableCam(event) {
     document.getElementById("faceline-image").style.visibility = "visible";
     document.getElementById("blue-shadow").style.visibility = "visible";
     document.getElementById("qrcode").style.visibility = "visible";
+    document.getElementById("progress-bar-container").style.visibility = "visible";
     document.getElementById("dynamic-element").style.visibility = "hidden";
     try{
       socket.on("temp-reading", (data) => {
@@ -72,6 +73,7 @@ function videoStop() {
       document.getElementById("faceline-image").style.visibility = "hidden";
       document.getElementById("blue-shadow").style.visibility = "hidden";
       document.getElementById("qrcode").style.visibility = "hidden";
+    document.getElementById("progress-bar-container").style.visibility = "hidden";
       document.getElementById("dynamic-element").style.visibility = "visible";
     }
     try{
