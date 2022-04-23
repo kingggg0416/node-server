@@ -50,7 +50,11 @@ function enableCam(event) {
     try{
       socket.on("temp-reading", (data) => {
         console.log(data);
-        checkTemp(data);
+        if(checkTemp(data)) {
+          socket.off("temp-reading");
+          showQrCode();
+          setTimeout(checkVax(),10000);
+        }
       });
     }catch(error) {
       console.log("socket is not defined");
@@ -58,7 +62,6 @@ function enableCam(event) {
 
     //video.addEventListener('loadeddata', predictWebcam);
   });
-
 }
 
 
@@ -111,12 +114,37 @@ function checkTemp(temp) {
   if(temp >= 37.5) {
     faceline.src = "./assets/img/faceline-red.png";
     element.style.color = "red";
+    document.body.appendChild(element);
+    return false;
   }
   else {
     faceline.src = "./assets/img/faceline-green.png";
     element.style.color = "green";
+    document.body.appendChild(element);
+    return true;
   }
-  document.body.appendChild(element);
+}
+
+function showQrCode() {
+  let element = document.getElementById("faceline-image");
+  let element2 = document.getElementById("qrcode");
+  let element3 = document.getElementById("button-style-one");
+  document.getElementsByClassName("temp-reading-on-screen")[0].remove();
+  element.style.visibility = "hidden";
+  element2.style.visibility = "hidden";
+  element3.style.visibility = "hidden";
+  let newElement1 = document.createElement("div");
+  let newElement2 = document.createElement("div");
+  let newElement3 = document.createElement("div");
+  newElement1.innerHTML = 'Please <span>show your vaccine record</span> or <span>tap your phone</span> *!';
+  newElement2.innerHTML = '*Open LeaveHomeSafe App';
+  newElement3.innerHTML = '<img src="./assets/img/qrcode-big.png" alt="qr code">';
+  newElement1.classList.add("message-3","animate__animated", "animate__slideInRight");
+  newElement2.classList.add("open-leave-home-save-msg");
+  newElement3.classList.add("qrcode-big");
+  document.body.appendChild(newElement1);
+  document.body.appendChild(newElement2);
+  document.body.appendChild(newElement3);
 }
 
 
@@ -130,7 +158,7 @@ if (getUserMediaSupported()) {
   console.warn('getUserMedia() is not supported by your browser');
 }
 
-// Placeholder function for next step.
-function predictWebcam() {
+function checkVax() {
+  
 }
 

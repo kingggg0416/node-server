@@ -65,6 +65,8 @@ html, body {
 
 body {
     background-image: url('../assets/img/restaurant-background.png');
+    max-width: 100%;
+    max-height: 100%;
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover; 
@@ -104,8 +106,10 @@ body {
 }
 
 #webcam {
-    width: 100%;
-    height: 100%;
+    width: 768px;
+    height: 1366px;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: cover;
     position: fixed;
     top: 0;
@@ -206,7 +210,7 @@ body {
     max-height:100%;
 }
 
-#message-3 {
+.message-3 {
     position: absolute;
     object-fit: contain;
     text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
@@ -214,12 +218,12 @@ body {
     font-weight: bold;
     letter-spacing: normal;
     color: white;
-    left: 14%;
+    left: 13%;
     right: 10%;
     top: 20%;
 }
 
-#message-3 span {
+.message-3 span {
     color: #f9d448;;
 }
 
@@ -229,10 +233,98 @@ body {
     height: 100%;
 }
 
-#qrcode-big {
+.qrcode-big {
     position: absolute;
     max-width: 100%;
     top: 40%;
     left: 50%;
     transform: translate(-50%,-10%);
 }
+
+.open-leave-home-save-msg {
+    position: absolute;
+    bottom: 3%;
+    left: 5%;
+    font-size: 1.5rem;
+    color: white;
+    font-weight: bold;
+    z-index: 8;
+}
+
+.dynamic-checkbox {
+    position: absolute;
+    top: 35%;
+    left: 30%;
+    right: 35%;
+}
+
+label{
+    position: relative;
+    height: 300px;
+    width: 300px;
+    display: inline-block;
+    border: 6px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    border-left-color: #5cb85c;
+    animation: rotate 1.2s linear infinite;
+  }
+  @keyframes rotate {
+    50%{
+      border-left-color: #9b59b6;
+    }
+    75%{
+      border-left-color: #e67e22;
+    }
+    100%{
+      transform: rotate(360deg);
+    }
+  }
+  label .check-icon{
+    display: none;
+  }
+  label .check-icon:after{
+    position: absolute;
+    content: "";
+    top: 50%;
+    left: 50px;
+    transform: scaleX(-1) rotate(135deg);
+    height: 180px;
+    width: 100px;
+    border-top: 8px solid #5cb85c;
+    border-right: 8px solid #5cb85c;
+    transform-origin: left top;
+    animation: check-icon 0.8s ease;
+  }
+  @keyframes check-icon {
+    0%{
+      height: 0;
+      width: 0;
+      opacity: 1;
+    }
+    20%{
+      height: 0;
+      width: 100px;
+      opacity: 1;
+    }
+    40%{
+      height: 180px;
+      width: 100px;
+      opacity: 1;
+    }
+    100%{
+      height: 180px;
+      width: 100px;
+      opacity: 1;
+    }
+  }
+  #check{
+    display: none; 
+  }
+  #check:checked ~ label .check-icon{
+    display: block;
+  }
+  #check:checked ~ label{
+    animation: none;
+    border-color: #5cb85c;
+    transition: border 0.5s ease-out;
+  }
