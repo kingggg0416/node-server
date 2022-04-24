@@ -81,7 +81,7 @@ function enableCam(event) {
                     document.getElementsByClassName("message-1")[0].style.visibility = "hidden";
                     document.getElementsByClassName("message-2")[0].style.visibility = "hidden";
                     loadFinalPage();
-                  }, 1000);
+                  }, 1500);
                 },500)
               }
               
