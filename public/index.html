@@ -27,7 +27,7 @@
     </div>
 
     <div id= "dynamic-element">
-        <div class = "color-overlay"></div>
+        <div id = "color-overlay"></div>
 
         <div class="message-1 animate__animated animate__fadeInUp">Please <span id="text-style-one">approach</span> to complete health check!</div>
         <div class = "message-2 animate__animated animate__fadeInUp">Let's keep everyone safe!</div>
@@ -48,19 +48,13 @@
     
     <div id = "progress-bar-container" style="visibility: hidden;">
         <div class="progress" style="height: 0.5rem;">
-          <div class="progress-bar" role="progressbar" style="width: 50%; height: 100%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+          <div class="progress-bar" role="progressbar" style="width: 0%; height: 100%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
         <button  id="mask" type="button" class="position-absolute top-0 start-0 translate-middle btn btn-sm btn-primary rounded-pill" style="width: 6rem; height: 6rem;"><img src="./assets/img/mask.png" alt=""></button>
         <button  id="thermometer" type="button" class="position-absolute top-0 start-50 translate-middle btn btn-sm btn-primary rounded-pill" style="width: 6rem; height: 6rem;"><img src="./assets/img/thermometer.png" alt=""></button>
         <button id="vaccination" type="button" class="position-absolute top-0 start-100 translate-middle btn btn-sm btn-secondary rounded-pill" style="width: 6rem; height : 6rem;"><img src="./assets/img/vaccination.png" alt=""></button>
     </div>
 
-    <!--div class="dynamic-checkbox">
-      <input type="checkbox" id="check">
-      <label for="check">
-         <div class="check-icon"></div>
-      </label>
-    </div !-->
 
 
     <script type = "text/javascript" src = "./script.js"></script>

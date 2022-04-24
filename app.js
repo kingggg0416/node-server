@@ -40,5 +40,11 @@ io.on('connection', function(socket) {
     console.log('Node is listening to port')
     setInterval(function () {
         socket.emit("temp-reading", Math.round(((Math.random()*100)*7)/10));
+        var y = Math.random()
+        if (y < 0.5)
+            y = 0
+        else
+            y= 1
+        socket.emit("verification-status", y)
     }, 1000);
 })
