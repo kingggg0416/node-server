@@ -46,6 +46,11 @@ function enableCam(event) {
     document.getElementById("qrcode").style.visibility = "visible";
     document.getElementById("progress-bar-container").style.visibility = "visible";
     document.getElementById("dynamic-element").style.visibility = "hidden";
+    try{
+      document.getElementsByClassName("thankyou-msg")[0].style.visibility = "hidden";
+      document.getElementsByClassName("thankyou-subtext")[0].style.visibility = "hidden";
+      document.getElementById("photo-style-one").style.visibility = "hidden";
+    }catch{}
     document.body.style.backgroundImage = "none";
     try{
       socket.on("temp-reading", (data) => {
@@ -111,6 +116,7 @@ function videoStop() {
       document.getElementById("qrcode").style.visibility = "hidden";
       document.getElementById("progress-bar-container").style.visibility = "hidden";
       document.getElementById("dynamic-element").style.visibility = "visible";
+      document.getElementById("photo-style-one").style.visibility = "visible";
       document.body.style.backgroundImage = "url('./assets/img/restaurant-background.png')";
     }
     try{
