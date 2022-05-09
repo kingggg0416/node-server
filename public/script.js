@@ -249,3 +249,27 @@ if (getUserMediaSupported()) {
 } else {
   console.warn('getUserMedia() is not supported by your browser');
 }
+
+function detect_and_predict_mask(frame,faceNet, maskNet) {
+  h = frame.shape[0];
+  w = frame.shape[1];
+	blob = cv2.dnn.blobFromImage(frame, 1.0, (224, 224),(104.0, 177.0, 123.0));
+  faceNet.setInput(blob)
+  detections = faceNet.forward();
+
+  faces = [];
+	locs = [];
+	preds = [];
+
+
+  for( let i = 0; i < detection.shpae[2]; i++) {
+    confidence = detections[0,0,i,2];
+    if(confidence > 0.5) {
+      prediction = maskNet.predict(frame);
+      mask = prediction[0];
+      without_mask = prediction[1];
+      if (mask > without_mask) 
+        return true;
+    }
+  }
+}
