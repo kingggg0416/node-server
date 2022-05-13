@@ -28,6 +28,7 @@ const stopWebcamButton = document.getElementById("stopWebcamButton");
   }
 }*/
 
+
 function enableCam(event) {
   /*if(!model) {
     return;
@@ -45,7 +46,7 @@ function enableCam(event) {
     document.getElementById("blue-shadow").style.visibility = "visible";
     document.getElementById("qrcode").style.visibility = "visible";
     document.getElementById("progress-bar-container").style.visibility = "visible";
-    document.getElementById("dynamic-element").style.visibility = "hidden";
+    document.getElementsByClassName("dynamic-element")[0].style.visibility = "hidden";
     try{
       document.getElementsByClassName("thankyou-msg")[0].style.visibility = "hidden";
       document.getElementsByClassName("thankyou-subtext")[0].style.visibility = "hidden";
@@ -115,7 +116,7 @@ function videoStop() {
       document.getElementById("blue-shadow").style.visibility = "hidden";
       document.getElementById("qrcode").style.visibility = "hidden";
       document.getElementById("progress-bar-container").style.visibility = "hidden";
-      document.getElementById("dynamic-element").style.visibility = "visible";
+      document.getElementsByClassName("dynamic-element")[0].style.visibility = "visible";
       document.getElementById("photo-style-one").style.visibility = "visible";
       document.body.style.backgroundImage = "url('./assets/img/restaurant-background.png')";
     }
@@ -147,10 +148,6 @@ function checkTemp(temp) {
     var element = document.createElement("div");
     element.innerHTML = `${temp}\u00B0C`;
     element.classList.add("temp-reading-on-screen");
-    element.style.position = "absolute";
-    element.style.top = "20%";
-    element.style.left = "42%";
-    element.style.fontSize = "4rem";
     document.body.appendChild(element);
   }
 

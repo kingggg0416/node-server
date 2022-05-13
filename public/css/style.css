@@ -87,9 +87,10 @@ body {
     background-attachment: fixed;
     background-size: cover; 
     opacity: 50%;
+    z-index: -1;
 }
 
-#dynamic-element {
+.dynamic-element , .dynamic-element-mask , .dynamic-element-qrcode, .dynamic-element-thank-you {
     position: relative;
     width: 100%;
     height: 100%;
@@ -184,6 +185,7 @@ body {
     height: 25%;
     top:0;
     background-image: linear-gradient(to bottom, #2f74b5 0%, rgba(0, 0, 0, 0) 100%);
+    z-index: -1;
 }
 
 #qrcode {
@@ -200,6 +202,13 @@ body {
     max-width: 100%;
     max-height: auto;
 
+}
+
+.temp-reading-on-screen, .pop-up-message {
+    position: absolute;
+    top:20%;
+    left:42%;
+    font-size: 4rem;
 }
 
 #progress-bar-container {
