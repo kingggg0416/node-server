@@ -5,8 +5,8 @@ try {
   }
   
   getHomePageElement();
-  //load_mask_model();
-  //load_model();
+  load_mask_model();
+  load_model();
   
   const video = document.getElementById("webcam");
   const enableWebcamButton = document.getElementById("webcamButton");
@@ -51,8 +51,19 @@ try {
       getCheckMaskElement();
       document.body.style.backgroundImage = "none";
       // mask-check loop
-      verify_mask();
-      removeMaskPageElement();
+      let myPromise = new Promise(function(myResolve, myReject){
+        count = verify_mask(count);
+        console.log(count);
+        if(count >=10) {
+          myResolve("true");
+        } else {
+          myReject("false");
+        }
+      }); 
+      myPromise.then (
+        function(value) {removeMaskPageElement();},
+        function(error) {console.log("error in promise");}
+      );
       getCheckTempElement();
       try{
         socket.on("temp-reading", (data) => {
@@ -92,8 +103,9 @@ try {
       }catch(error) {
         console.log("socket is not defined");
       }
-  
-      //video.addEventListener('loadeddata', predictWebcam);
+    
+        //video.addEventListener('loadeddata', predictWebcam);
+
     });
   }
   
@@ -423,10 +435,10 @@ function deleteChecklogo() {
 
 
 //mask detection functions
-/*
+
 var model = undefined;
 var mask_model = undefined;
-const STATUS = document.getElementById("status");
+/*const STATUS = document.getElementById("status");
 var load = document.getElementById("load");
 var load_mask = document.getElementById("load-mask-model");
 const VIDEO = document.getElementById("webcam");
@@ -468,7 +480,7 @@ function predict_change_status() {
 
 async function load_model() {
   model = await blazeface.load();
-  console.log("Blazeface Model loaded")
+  console.log("Blazeface Model loaded");
 }
 async function load_mask_model() {
   mask_model = await tf.loadLayersModel('./model.json');
@@ -478,9 +490,10 @@ async function load_mask_model() {
 async function predict_and_check_mask() {
     // Pass in an image or video to the model. The model returns an array of
     // bounding boxes, probabilities, and landmarks, one for each detected face.
-    let faces = [];
+    let faces = []; 
     const returnTensors = false; // Pass in `true` to get tensors back, rather than values.
-    const predictions = await model.estimateFaces(document.querySelector("video"), returnTensors);
+    let video = document.getElementById("webcam");
+    const predictions = await model.estimateFaces(video);
     if (predictions.length > 0) {
         for (let i = 0; i < predictions.length; i++) {
             const start = predictions[i].topLeft;
@@ -488,7 +501,7 @@ async function predict_and_check_mask() {
             const size = [end[0] - start[0], end[1] - start[1]]; //first is width second is height
             //console.log("The faces are ",faces[i]);
 
-            let result = await mask_model.predict(cropCanvasImage(document.querySelector("video"),start,size[0], size[1]).expandDims(), false);
+            let result = await mask_model.predict(cropCanvasImage(video,start,size[0], size[1]).expandDims(), false);
             console.log("The result is (mask)", result.dataSync()[0]);
             console.log("The result is (without_mask)", result.dataSync()[1]);
             tf.dispose();
@@ -504,9 +517,8 @@ async function predict_and_check_mask() {
 
 }  
 
-function verify_mask() {
+function verify_mask(count) {
   //we will check the person's mask for two second, at 0.2s interval, and within the interval if it is wearing mask, we return true
-  var count = 0;
   var interval = setInterval(function() {
     let probaility = predict_and_check_mask();
     if(probaility > 0.8) {
@@ -516,12 +528,11 @@ function verify_mask() {
       count = 0;
     }
     if(count >= 10) {
+      document.getElementsByClassName("pop-up-message")[0].innerHTML = "Mask Checked";
       clearInterval(interval);
+      console.log("The number of count is", count);
     }
   }, 200)
-
-  return true;
-
 }
 
 
