@@ -5,6 +5,8 @@ try {
   }
   
   getHomePageElement();
+  //load_mask_model();
+  //load_model();
   
   const video = document.getElementById("webcam");
   const enableWebcamButton = document.getElementById("webcamButton");
@@ -47,15 +49,17 @@ try {
       removeThankYouPageElement();
       removeHomePageElement();
       getCheckMaskElement();
+      document.body.style.backgroundImage = "none";
+      // mask-check loop
+      verify_mask();
       removeMaskPageElement();
       getCheckTempElement();
-      document.body.style.backgroundImage = "none";
       try{
         socket.on("temp-reading", (data) => {
           console.log(data);
           if(checkTemp(data)) {
             socket.off("temp-reading");
-            setTimeout(removeTempPageElement,1000);
+            setTimeout(removeTempPageElement,10000);
             getShowQrCodeElement();
             setTimeout(() =>{
               socket.on("verification-status", data => {
@@ -295,10 +299,11 @@ function removeHomePageElement() {
 }
 
 function getCheckMaskElement() {
+  console.log("running get check mask");
     let mask_page_element = document.createElement("div");
     mask_page_element.innerHTML = '<div id="blue-shadow"></div>';
     mask_page_element.insertAdjacentHTML('beforeend','<div id="faceline-container"><img id="faceline-image" src="./assets/img/faceline-white.png" alt="faceline"></div>');
-    mask_page_element.insertAdjacentHTML('beforeend','<div id="qrcode" style = "visibility : hidden;"><img src="./assets/img/qrcode.png" alt="vaccination code"></div>');
+    mask_page_element.insertAdjacentHTML('beforeend','<div id="qrcode"><img src="./assets/img/qrcode.png" alt="vaccination code"></div>');
     mask_page_element.insertAdjacentHTML('beforeend','<div class ="pop-up-message">Checking mask...</div>');
     mask_page_element.classList.add("dynamic-element-mask");
 
@@ -311,6 +316,7 @@ function removeMaskPageElement() {
     try{
         //document.getElementsByClassName("dynamic-element-mask")[0].remove();
         document.getElementsByClassName("progress-bar")[0].style.width = "50%";
+        document.getElementsByClassName("pop-up-message")[0].remove();
     }
     catch{
         console.log("element(s) does not exist");
@@ -321,9 +327,8 @@ function removeMaskPageElement() {
 function getCheckTempElement() {
     //nothing to get (as it is the same design as check mask page) only next to change the text of the pop up message
     try{
-        let element = document.getElementsByClassName("pop-up-message")[0];
-        element.innerHTML = "";
-        element.classList.add("temp-reading-on-screen");
+        let element = document.getElementsByClassName("dynamic-element-mask")[0];
+        element.insertAdjacentHTML('beforeend','<div class = "temp-reading-on-screen"></div>');
     }catch{
         console.log("Element(s) does not exist");
     }
@@ -413,3 +418,110 @@ function deleteChecklogo() {
         console.log("Element(s) does not exist");
     }
 }
+
+
+
+
+//mask detection functions
+/*
+var model = undefined;
+var mask_model = undefined;
+const STATUS = document.getElementById("status");
+var load = document.getElementById("load");
+var load_mask = document.getElementById("load-mask-model");
+const VIDEO = document.getElementById("webcam");
+const ENABLE_CAM_BUTTON = document.getElementById('enableCam');
+const PREDICT = document.getElementById('predict');
+var stop_predict_button = document.getElementById('stop-predict');
+var continue_predict_button = document.getElementById('continue-predict');
+ENABLE_CAM_BUTTON.addEventListener('click', enableCam);
+PREDICT.addEventListener('click', predict_and_check_mask);
+load.addEventListener('click', loadModel);
+load_mask.addEventListener('click', load_mask_model);
+stop_predict_button.addEventListener('click', predict_change_status);
+continue_predict_button.addEventListener('click', predict_change_status);
+var predict_status = true;
+*/
+
+function cropCanvasImage(video, top_left, width, height) {
+  var canvas = document.getElementById('canvas');
+  canvas.width = 224;
+  canvas.height = 224;
+  let ctx = canvas.getContext('2d');
+  ctx.drawImage(
+      video,
+      top_left[0], top_left[1],
+      width, height,
+      0,0,
+      224, 224
+  );
+  //let href = canvas.toDataURL();
+  //console.log("The tensor shape is ", tensor.shape)
+  //let resizedTensorFrame = tf.image.resizeBilinear(tensor,224, 224, true);
+  let tensor = tf.browser.fromPixels(canvas, 3).div(255);
+  return tensor;
+}
+
+function predict_change_status() {
+  predict_status = (predict_status == true)? false : true;
+}
+
+async function load_model() {
+  model = await blazeface.load();
+  console.log("Blazeface Model loaded")
+}
+async function load_mask_model() {
+  mask_model = await tf.loadLayersModel('./model.json');
+  console.log("Mask Model loaded");
+}
+
+async function predict_and_check_mask() {
+    // Pass in an image or video to the model. The model returns an array of
+    // bounding boxes, probabilities, and landmarks, one for each detected face.
+    let faces = [];
+    const returnTensors = false; // Pass in `true` to get tensors back, rather than values.
+    const predictions = await model.estimateFaces(document.querySelector("video"), returnTensors);
+    if (predictions.length > 0) {
+        for (let i = 0; i < predictions.length; i++) {
+            const start = predictions[i].topLeft;
+            const end = predictions[i].bottomRight;
+            const size = [end[0] - start[0], end[1] - start[1]]; //first is width second is height
+            //console.log("The faces are ",faces[i]);
+
+            let result = await mask_model.predict(cropCanvasImage(document.querySelector("video"),start,size[0], size[1]).expandDims(), false);
+            console.log("The result is (mask)", result.dataSync()[0]);
+            console.log("The result is (without_mask)", result.dataSync()[1]);
+            tf.dispose();
+            //return the probaility for with_mask
+            return result.dataSync()[0];
+        }
+
+    } 
+    else{
+        console.log("No person is detected");
+    }  
+
+
+}  
+
+function verify_mask() {
+  //we will check the person's mask for two second, at 0.2s interval, and within the interval if it is wearing mask, we return true
+  var count = 0;
+  var interval = setInterval(function() {
+    let probaility = predict_and_check_mask();
+    if(probaility > 0.8) {
+      count++;
+    }
+    else{
+      count = 0;
+    }
+    if(count >= 10) {
+      clearInterval(interval);
+    }
+  }, 200)
+
+  return true;
+
+}
+
+

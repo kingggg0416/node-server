@@ -204,11 +204,23 @@ body {
 
 }
 
-.temp-reading-on-screen, .pop-up-message {
+.temp-reading-on-screen{
     position: absolute;
+    display: flex;
+    align-items: center;
     top:20%;
     left:42%;
     font-size: 4rem;
+    z-index: 5;
+}
+
+.pop-up-message {
+    position: absolute;
+    top:22%;
+    left: 29%;
+    font-size: 3rem;
+    color: white;
+    z-index: 5;
 }
 
 #progress-bar-container {

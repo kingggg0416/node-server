@@ -199,7 +199,7 @@ function checkVax(data) {
   
   if(document.getElementsByClassName("frame-element").length != 0) {
     var frameBox = document.getElementsByClassName("frame-element")[0];
-  }
+  } 
   else {
     var frameBox = document.createElement("div");
     frameBox.classList.add("frame-element");
