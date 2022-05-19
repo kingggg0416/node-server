@@ -7,10 +7,67 @@ try {
   getHomePageElement();
   load_mask_model();
   load_model();
-  
+
+  //showChecked();
   const video = document.getElementById("webcam");
-  const enableWebcamButton = document.getElementById("webcamButton");
-  const stopWebcamButton = document.getElementById("stopWebcamButton");
+  const enableWebcamButton = document.getElementById("button-style-two");
+  const stopWebcamButton = document.getElementById("button-style-one");
+
+
+  // If webcam supported, add event listener to button for when user
+  // wants to activate it to call enableCam function which we will 
+  // define in the next step.
+  if (getUserMediaSupported()) {
+    enableWebcamButton.addEventListener('click', enableCam);
+    stopWebcamButton.addEventListener('click', videoStop);
+  } else {
+    console.warn('getUserMedia() is not supported by your browser');
+  }
+
+  async function enableCam(event) {
+    event.target.classList.add('removed');
+    const constraints = {
+        video: true
+    };
+
+    navigator.mediaDevices.getUserMedia(constraints).then(async function(stream) {
+        video.srcObject = stream;
+
+        //clear the page 
+        removeThankYouPageElement();
+        removeHomePageElement();
+        document.body.style.backgroundImage = "none";
+        console.log("dummy1");
+        //event loop for check mask
+        getCheckMaskElement();
+        await checkMask();
+        removeMaskPageElement();
+        console.log("dummy2");
+        //event loop for check Temperature
+        getCheckTempElement();
+        await checkTemp();
+        removeTempPageElement();
+        console.log("dummy3");
+        //event loop for show qr code page
+        getShowQrCodeElement();
+        await sleeper(5000);
+        removeShowQrCodePageElement();
+        console.log("dummy4");
+        //event loop for scan qrCode
+        getScanQrCodeElement();
+        await checkVax();
+        removeScanQrCodePageElement();
+        console.log("dummy5");
+        //event loop for checked animation
+        showChecked();
+        await sleeper(1500);
+        removeCheck();
+        console.log("dummy6");
+        //event loop for final thank you page
+        getThankYouPageElement();
+
+    });
+}
   
   
   //const model = await tf.loadLayersModel("../model.json")
@@ -32,82 +89,6 @@ try {
   }*/
 
 
-  
-  function enableCam(event) {
-    /*if(!model) {
-      return;
-    }*/
-    event.target.classList.add('removed');  
-  
-    // getUsermedia parameters to force video but not audio.
-    const constraints = {
-      video: true
-    };
-  
-    navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
-      video.srcObject = stream;
-      removeThankYouPageElement();
-      removeHomePageElement();
-      getCheckMaskElement();
-      document.body.style.backgroundImage = "none";
-      // mask-check loop
-      let myPromise = new Promise(function(myResolve, myReject){
-        count = verify_mask(count);
-        console.log(count);
-        if(count >=10) {
-          myResolve("true");
-        } else {
-          myReject("false");
-        }
-      }); 
-      myPromise.then (
-        function(value) {removeMaskPageElement();},
-        function(error) {console.log("error in promise");}
-      );
-      getCheckTempElement();
-      try{
-        socket.on("temp-reading", (data) => {
-          console.log(data);
-          if(checkTemp(data)) {
-            socket.off("temp-reading");
-            setTimeout(removeTempPageElement,10000);
-            getShowQrCodeElement();
-            setTimeout(() =>{
-              socket.on("verification-status", data => {
-                console.log("verfication-status:",data);
-                removeShowQrCodePageElement();
-                getScanQrCodeElement();
-                if(checkVax(data)) {
-                  socket.off("verification-status");
-                  setTimeout(() => {
-                    try{
-                      document.getElementsByClassName("frame-element")[0].remove();
-                      document.getElementById("qrcode").style.visibility = "hidden";
-                    }catch{
-                      console.log("elements already removed");
-                    };
-                    document.getElementsByClassName("progress-bar")[0].style.width = "100%";
-                    showChecked();
-                    setTimeout(() => {
-                        removeScanQrCodePageElement();
-                        videoStop();
-                        getThankYouPageElement();
-                    }, 1500);
-                  },500)
-                }
-                
-              })
-            },6000); 
-          }
-        });
-      }catch(error) {
-        console.log("socket is not defined");
-      }
-    
-        //video.addEventListener('loadeddata', predictWebcam);
-
-    });
-  }
   
   
   function videoStop() {
@@ -137,35 +118,50 @@ try {
       navigator.mediaDevices.getUserMedia);
   }
   
+
+async function checkTemp() {
+    return new Promise(async (resolve, reject) => {
+        var temp_status = false;
+        var element = document.getElementsByClassName("temp-reading-on-screen")[0];
+        await sleeper(300);
+        socket.on("temp-reading",async (temp) => {
+            console.log(temp);
+            element.innerHTML = `${temp}\u00B0C`;
+
+            if(temp >= 37.5) {
+                document.getElementById("faceline-container").remove();
+                let faceline = document.createElement('div');
+                faceline.innerHTML = '<img src="./assets/img/faceline-red.png" alt="faceline">';
+                faceline.setAttribute('id', 'faceline-container');
+                document.getElementsByClassName("dynamic-element-temp")[0].appendChild(faceline);
+                element.style.color = "red";
+            }
+            else {
+                document.getElementById("faceline-container").remove();
+
+                let faceline = document.createElement('div');
+                faceline.innerHTML = '<img src="./assets/img/faceline-green.png" alt="faceline">';
+                faceline.setAttribute('id', 'faceline-container');
+                document.getElementsByClassName("dynamic-element-temp")[0].appendChild(faceline);
+                element.style.color = "green";
+                await sleeper(300);
+                temp_status = true;
+            }
+
+            //stopping condition
+            if (temp_status){
+                socket.off("temp-reading");
+                element.innerHTML = "Seems Good!";
+                console.log("Finished checking mask");
+                await sleeper(1000);
+                resolve("Temperature Checked");
+            }
+        }); 
+    });
+}
   
-  function checkTemp(temp) {
-      console.log("running check Temp");
-    var faceline = document.getElementById("faceline-image");
-    if(document.getElementsByClassName("temp-reading-on-screen").length != 0) {
-      var element = document.getElementsByClassName("temp-reading-on-screen")[0];
-      element.innerHTML = `${temp}\u00B0C`;
-    }
-    else{
-      var element = document.createElement("div");
-      element.innerHTML = `${temp}\u00B0C`;
-      element.classList.add("temp-reading-on-screen");
-      document.body.appendChild(element);
-    }
-  
-    if(temp >= 37.5) {
-      faceline.src = "./assets/img/faceline-red.png";
-      element.style.color = "red";
-      return false;
-    }
-    else {
-      faceline.src = "./assets/img/faceline-green.png";
-      element.style.color = "green";
-      return true;
-    }
-  }
-  
-  
-  
+
+  /*
   function showQrCode() {
     document.getElementsByClassName("progress-bar")[0].style.width = "50%";
     let element = document.getElementById("faceline-image");
@@ -194,67 +190,45 @@ try {
     document.body.appendChild(newElement2);
     document.body.appendChild(newElement3);
   }
+  */
   
-  
-  function checkVax(data) {
-    
-    if(document.getElementsByClassName("frame-element").length != 0) {
-      var frameBox = document.getElementsByClassName("frame-element")[0];
-    }
-    else {
-      var frameBox = document.createElement("div");
-      frameBox.classList.add("frame-element");
-      frameBox.innerHTML = '<img src="./assets/img/white-frame.png" alt="frame">';
-      document.body.appendChild(frameBox);
-    }
-    //data 0 stands for not verified yet, data 1 stands for verified
-    if(data == 0) {
-      frameBox.firstChild.src =  "./assets/img/red-frame.png";
-      return false;
-    }
-    else if(data == 1) {
-      frameBox.firstChild.src =  "./assets/img/green-frame.png";
-      //putting return flase here to visualize first
-      return true;
-      //return false;
-    }
-  }
-  
-  function showChecked() {
-    let element = document.createElement("div");
-    element.classList.add("dynamic-checkbox");
-    element.innerHTML = '<input type="checkbox" id="check"><label for="check" id="check-label"><div class="check-icon"></div></label>';
-    document.body.appendChild(element);
-    element.firstChild.checked = true;
-  
-  }
+async function checkVax() {
+    return new Promise((resolve, reject) => {
+        var vax_status = false;
+        socket.on("verification-status",async (data) => {
+            // 0 stands for false , 1 stands for true
+            console.log("Verification status: ",data);
 
+            if(data == 0) {
+                document.getElementById("frame-element").remove();
+                let frameBox = document.createElement('div');
+                frameBox.innerHTML = '<img src="./assets/img/red-frame.png" alt="frame">';
+                frameBox.setAttribute('id', 'frame-element');
+                document.getElementsByClassName("dynamic-element-qrcode")[0].appendChild(frameBox);
+            }
+            else if(data == 1) {
+                document.getElementById("frame-element").remove();
+                let frameBox = document.createElement('div');
+                frameBox.innerHTML = '<img src="./assets/img/green-frame.png" alt="frame">';
+                frameBox.setAttribute('id', 'frame-element');
+                document.getElementsByClassName("dynamic-element-qrcode")[0].appendChild(frameBox);
+                await sleeper(800);
+                vax_status = true;
+            }
+
+            //stopping condition
+            if (vax_status) {
+                socket.off("verification-status");
+                console.log("Vaccination record is checked");
+                resolve("Vaccination record is checked");
+            }
+        }); 
+    });
+}
+  
 
   
-  function loadFinalPage() {
-      document.getElementsByClassName("image-container-1")[0].style.visibility = "visible";
-      document.getElementById("color-overlay").style.visibility = "visible";
-      //document.getElementById("temp-helper").style.visibility = "hidden";
-      document.getElementsByClassName("dynamic-checkbox")[0].remove();
-      let element1 = document.createElement("div");
-      let element2 = document.createElement("div");
-      element1.innerHTML = 'Thank <span>YOU!</span>';
-      element2.innerHTML = 'Let\'s do our part to keep everyone safe!';
-      element1.classList.add("thankyou-msg", "animate__animated", "animate__fadeInUp");
-      element2.classList.add("thankyou-subtext", "animate__animated", "animate__fadeInUp");
-      document.body.appendChild(element1);
-      document.body.appendChild(element2);
-  }
-  
-  // If webcam supported, add event listener to button for when user
-  // wants to activate it to call enableCam function which we will 
-  // define in the next step.
-  if (getUserMediaSupported()) {
-    enableWebcamButton.addEventListener('click', enableCam);
-    stopWebcamButton.addEventListener('click', videoStop);
-  } else {
-    console.warn('getUserMedia() is not supported by your browser');
-  }
+
   
   function detect_and_predict_mask(frame,faceNet, maskNet) {
     h = frame.shape[0];
@@ -311,16 +285,16 @@ function removeHomePageElement() {
 }
 
 function getCheckMaskElement() {
-  console.log("running get check mask");
+    console.log("running get check mask");
+    document.getElementById("progress-bar-container").style.visibility = "visible";
     let mask_page_element = document.createElement("div");
     mask_page_element.innerHTML = '<div id="blue-shadow"></div>';
-    mask_page_element.insertAdjacentHTML('beforeend','<div id="faceline-container"><img id="faceline-image" src="./assets/img/faceline-white.png" alt="faceline"></div>');
+    mask_page_element.insertAdjacentHTML('beforeend','<div id="faceline-container"><img src="./assets/img/faceline-white.png" alt="faceline"></div>');
     mask_page_element.insertAdjacentHTML('beforeend','<div id="qrcode"><img src="./assets/img/qrcode.png" alt="vaccination code"></div>');
-    mask_page_element.insertAdjacentHTML('beforeend','<div class ="pop-up-message">Checking mask...</div>');
+    mask_page_element.insertAdjacentHTML('beforeend','<div class = "mask-text-wrapper"><div class ="pop-up-message">Checking mask...</div></div>');
     mask_page_element.classList.add("dynamic-element-mask");
-
-    document.getElementById("progress-bar-container").style.visibility = "visible";
     document.body.appendChild(mask_page_element);
+    console.log("Finished running getCheckMaskElement");
 
 }
 
@@ -328,7 +302,7 @@ function removeMaskPageElement() {
     try{
         //document.getElementsByClassName("dynamic-element-mask")[0].remove();
         document.getElementsByClassName("progress-bar")[0].style.width = "50%";
-        document.getElementsByClassName("pop-up-message")[0].remove();
+        document.getElementsByClassName("dynamic-element-mask")[0].remove();
     }
     catch{
         console.log("element(s) does not exist");
@@ -337,18 +311,20 @@ function removeMaskPageElement() {
 }
 
 function getCheckTempElement() {
-    //nothing to get (as it is the same design as check mask page) only next to change the text of the pop up message
-    try{
-        let element = document.getElementsByClassName("dynamic-element-mask")[0];
-        element.insertAdjacentHTML('beforeend','<div class = "temp-reading-on-screen"></div>');
-    }catch{
-        console.log("Element(s) does not exist");
-    }
+    console.log("running get check mask");;
+    let temp_page_element = document.createElement("div");
+    temp_page_element.innerHTML = '<div id="blue-shadow"></div>';
+    temp_page_element.insertAdjacentHTML('beforeend','<div id="faceline-container"><img src="./assets/img/faceline-white.png" alt="faceline"></div>');
+    temp_page_element.insertAdjacentHTML('beforeend','<div id="qrcode"><img src="./assets/img/qrcode.png" alt="vaccination code"></div>');
+    temp_page_element.insertAdjacentHTML('beforeend','<div class = "temp-text-wrapper" ><div class = "temp-reading-on-screen">Checking Temperature...</div></div>');
+    temp_page_element.classList.add("dynamic-element-temp");
+    document.body.appendChild(temp_page_element);
+
 }
 
 function removeTempPageElement() {
     try{
-        document.getElementsByClassName("dynamic-element-mask")[0].remove();
+        document.getElementsByClassName("dynamic-element-temp")[0].remove();
     }
     catch{
         console.log("element(s) does not exist");
@@ -358,7 +334,7 @@ function removeTempPageElement() {
 function getShowQrCodeElement() {
     let show_qr_code_page  = document.createElement("div");
     show_qr_code_page.innerHTML = "";
-    show_qr_code_page.insertAdjacentHTML('beforeend','<div class="message-3 animate__animated animate__fadeInUp">Please <span>show your vaccine record</span> or <span>tap your phone</span> *!</div>');
+    show_qr_code_page.insertAdjacentHTML('beforeend','<div class ="message-3"><div class="animate__animated animate__fadeInUp">Please <span>show your vaccine record</span> or <span>tap your phone</span> *!</div></div>');
     show_qr_code_page.insertAdjacentHTML('beforeend','<div id = "color-overlay"></div>');
     show_qr_code_page.insertAdjacentHTML('beforeend','<div class ="open-leave-home-save-msg">*Open LeaveHomeSafe App</div>');
     show_qr_code_page.insertAdjacentHTML('beforeend','<div class ="qrcode-big"><img src="./assets/img/qrcode-big.png" alt="qr code"></div>');
@@ -380,15 +356,15 @@ function getScanQrCodeElement() {
     document.getElementsByClassName("progress-bar")[0].style.width = "100%";
     let scan_qr_code_page_element = document.createElement("div");
     scan_qr_code_page_element.innerHTML = '<div id="blue-shadow"></div>';
-    scan_qr_code_page_element.insertAdjacentHTML('beforeend','<div class = "frame-element"><img src="./assets/img/white-frame.png" alt="frame"></div>');
+    scan_qr_code_page_element.insertAdjacentHTML('beforeend','<div id ="frame-element"><img src="./assets/img/white-frame.png" alt="frame"></div>');
     scan_qr_code_page_element.insertAdjacentHTML('beforeend','<div id="qrcode"><img src="./assets/img/qrcode.png" alt="vaccination code"></div>');
     scan_qr_code_page_element.classList.add("dynamic-element-qrcode");
     document.body.appendChild(scan_qr_code_page_element);
-
 }
 
-function removeScanQrCodePageElement() {
+async function removeScanQrCodePageElement() {
     try{
+        document.getElementById("frame-element").remove();
         document.getElementsByClassName("dynamic-element-qrcode")[0].remove();
 
     }
@@ -408,8 +384,6 @@ function getThankYouPageElement() {
     //to restart all the elements
     document.getElementsByClassName("progress-bar")[0].style.width = "0%";
     document.getElementById("progress-bar-container").style.visibility = "hidden";
-
-    deleteChecklogo();
     document.body.appendChild(thank_you_page_element);
 }
 
@@ -421,16 +395,6 @@ function removeThankYouPageElement() {
         console.log("element(s) does not exist");
     }
 }
-
-function deleteChecklogo() {
-    try {
-        document.getElementsByClassName("dynamic-checkbox")[0].remove();
-    }
-    catch{
-        console.log("Element(s) does not exist");
-    }
-}
-
 
 
 
@@ -481,6 +445,8 @@ function predict_change_status() {
 async function load_model() {
   model = await blazeface.load();
   console.log("Blazeface Model loaded");
+  let result = await model.estimateFaces(document.getElementById("model_initializer"));
+  console.log("Initialized blazeface_model: ",result);
 }
 async function load_mask_model() {
   mask_model = await tf.loadLayersModel('./model.json');
@@ -512,27 +478,64 @@ async function predict_and_check_mask() {
     } 
     else{
         console.log("No person is detected");
+        return 0;
     }  
 
 
 }  
 
-function verify_mask(count) {
-  //we will check the person's mask for two second, at 0.2s interval, and within the interval if it is wearing mask, we return true
-  var interval = setInterval(function() {
-    let probaility = predict_and_check_mask();
-    if(probaility > 0.8) {
-      count++;
-    }
-    else{
-      count = 0;
-    }
-    if(count >= 10) {
-      document.getElementsByClassName("pop-up-message")[0].innerHTML = "Mask Checked";
-      clearInterval(interval);
-      console.log("The number of count is", count);
-    }
-  }, 200)
+async function checkMask() {
+    let count = 0;
+    while(count < 10) {
+        setTimeout(async function() {
+            console.log("Checking Mask... Current Count is: ",count);
+            let probability = await predict_and_check_mask();
+            if(probability >0.8){
+                count ++;
+            }
+            else {
+                count = 0;
+            }
+        }, 200);
+        await sleeper(200);
+    };
+    document.getElementById("faceline-container").remove();
+    let faceline = document.createElement('div');
+    faceline.innerHTML = '<img src="./assets/img/faceline-green.png" alt="faceline">';
+    faceline.setAttribute('id', 'faceline-container');
+    document.getElementsByClassName("dynamic-element-mask")[0].appendChild(faceline);
+    let element2 = document.getElementsByClassName("pop-up-message")[0];
+    element2.style.color = "green";
+    element2.innerHTML = "Perfect!";
+    await sleeper(2000);
+    return "Mask is Checked";
 }
 
+async function sleeper(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
+function showChecked() {
+    console.log("Running showChecked()");
+    let element = document.createElement("div");
+    element.classList.add("dynamic-checkbox");
+    element.innerHTML = '<input type="checkbox" id="check"><label for="check" id="check-label"><div class="check-icon"></div></label>';
+    let element2 = document.createElement("div");
+    element2.classList.add("dynamic-element");
+    element2.innerHTML = '<div id="blue-shadow"></div>';
+    document.body.appendChild(element2);
+    document.body.appendChild(element);
+    element.firstChild.checked = true;
+    console.log("Finished running showChecked()");
+  }
+
+
+function removeCheck() {
+    try {
+        document.getElementsByClassName("dynamic-checkbox")[0].remove();
+        document.getElementsByClassName("dynamic-element")[0].remove();
+    }
+    catch{
+        console.log("Element(s) does not exist");
+    }
+}

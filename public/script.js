@@ -38,7 +38,8 @@ function enableCam(event) {
 
   // getUsermedia parameters to force video but not audio.
   const constraints = {
-    video: true
+    video: true,
+    audio: false
   };
 
   navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
@@ -241,29 +242,7 @@ stopWebcamButton.addEventListener('click', videoStop);
 console.warn('getUserMedia() is not supported by your browser');
 }
 
-function detect_and_predict_mask(frame,faceNet, maskNet) {
-h = frame.shape[0];
-w = frame.shape[1];
-  blob = cv2.dnn.blobFromImage(frame, 1.0, (224, 224),(104.0, 177.0, 123.0));
-faceNet.setInput(blob)
-detections = faceNet.forward();
 
-faces = [];
-  locs = [];
-  preds = [];
-
-
-for( let i = 0; i < detection.shpae[2]; i++) {
-  confidence = detections[0,0,i,2];
-  if(confidence > 0.5) {
-    prediction = maskNet.predict(frame);
-    mask = prediction[0];
-    without_mask = prediction[1];
-    if (mask > without_mask) 
-      return true;
-  }
-}
-}
 
 
 
@@ -394,7 +373,6 @@ thank_you_page_element.classList.add("dynamic-element-thank-you");
 document.getElementsByClassName("progress-bar")[0].style.width = "0%";
 document.getElementById("progress-bar-container").style.visibility = "hidden";
 
-deleteChecklogo();
 document.body.appendChild(thank_you_page_element);
 }
 
@@ -407,7 +385,7 @@ catch{
 }
 }
 
-function deleteChecklogo() {
+function removeCheck() {
 try {
     document.getElementsByClassName("dynamic-checkbox")[0].remove();
 }
@@ -472,7 +450,7 @@ mask_model = await tf.loadLayersModel('./model.json');
 console.log("Mask Model loaded");
 }
 
-async function predict_and_check_mask() {
+function predict_and_check_mask() {
 // Pass in an image or video to the model. The model returns an array of
 // bounding boxes, probabilities, and landmarks, one for each detected face.
 let faces = []; 
