@@ -486,6 +486,7 @@ async function predict_and_check_mask() {
 
 async function checkMask() {
     let count = 0;
+    let count_no_mask = 0;
     while(count < 10) {
         setTimeout(async function() {
             console.log("Checking Mask... Current Count is: ",count);
@@ -494,7 +495,19 @@ async function checkMask() {
                 count ++;
             }
             else {
+                count_no_mask++;
                 count = 0;
+            }
+            if(count_no_mask >=6) {
+              document.getElementById("faceline-container").remove();
+              let faceline = document.createElement('div');
+              faceline.innerHTML = '<img src="./assets/img/faceline-red.png" alt="faceline">';
+              faceline.setAttribute('id', 'faceline-container');
+              document.getElementsByClassName("dynamic-element-mask")[0].appendChild(faceline);
+              let element2 = document.getElementsByClassName("pop-up-message")[0];
+              element2.style.color = "red";
+              element2.innerHTML = "Please wear your mask!";
+              count_no_mask = 0;
             }
         }, 200);
         await sleeper(200);
